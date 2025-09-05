@@ -46,8 +46,6 @@ public class StatsClientRest implements StatsClient {
         restClient = RestClient.builder()
                 .baseUrl(statsServerUrl)
                 .build();
-
-
     }
 
     @Override
