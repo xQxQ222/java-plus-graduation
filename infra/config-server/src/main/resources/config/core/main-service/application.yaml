@@ -1,0 +1,18 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:7432/main
+    username: main
+    password: main
+  sql:
+    init:
+      mode: always
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+
+discovery:
+  stats:
+    stats-server-id: stats-server
