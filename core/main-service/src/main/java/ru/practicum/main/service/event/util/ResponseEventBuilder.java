@@ -1,7 +1,5 @@
 package ru.practicum.main.service.event.util;
 
-import client.StatParam;
-import client.StatsClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,6 +16,7 @@ import ru.practicum.main.service.request.RequestRepository;
 import ru.practicum.main.service.request.enums.RequestStatus;
 import ru.practicum.main.service.request.model.ConfirmedRequests;
 import ru.practicum.stats.dto.ViewStatsDto;
+import ru.yandex.practicum.feign.client.StatsFeignClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ public class ResponseEventBuilder {
     private final MapperComment commentMapper;
     private final RequestRepository requestRepository;
     private final CommentRepository commentRepository;
-    private final StatsClient statsClient;
+    private final StatsFeignClient statsClient;
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
         T dto;
@@ -100,19 +99,7 @@ public class ResponseEventBuilder {
     }
 
     private long getOneEventViews(LocalDateTime created, long eventId) {
-        StatParam statParam = StatParam.builder()
-                .start(created.minusMinutes(1))
-                .end(LocalDateTime.now().plusMinutes(1))
-                .unique(true)
-                .uris(List.of("/events/" + eventId))
-                .build();
-
-        List<ViewStatsDto> viewStats = statsClient.getStat(statParam);
-        log.debug("Статистика пустая = {} . Одиночный от статистики по запросу uris = {}, start = {}, end = {}",
-                viewStats.isEmpty(),
-                statParam.getUris(),
-                statParam.getStart(),
-                statParam.getEnd());
+        List<ViewStatsDto> viewStats = statsClient.getStats(created.minusMinutes(1), LocalDateTime.now().plusMinutes(1), List.of("/events/" + eventId), true).getBody();
         return viewStats.isEmpty() ? 0 : viewStats.getFirst().getHits();
     }
 
@@ -131,19 +118,7 @@ public class ResponseEventBuilder {
                 .map(id -> "/events/" + id)
                 .toList();
 
-        StatParam statParam = StatParam.builder()
-                .start(MIN_START_DATE)
-                .end(LocalDateTime.now().plusMinutes(1))
-                .unique(true)
-                .uris(uris)
-                .build();
-
-        List<ViewStatsDto> viewStats = statsClient.getStat(statParam);
-        log.debug("Получен ответ size = {}, массовый от статистики по запросу uris = {}, start = {}, end = {}",
-                viewStats.size(),
-                statParam.getUris(),
-                statParam.getStart(),
-                statParam.getEnd());
+        List<ViewStatsDto> viewStats = statsClient.getStats(MIN_START_DATE, LocalDateTime.now().plusMinutes(1), uris, true).getBody();
         return viewStats;
     }
 

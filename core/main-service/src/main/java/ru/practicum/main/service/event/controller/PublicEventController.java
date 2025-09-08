@@ -1,6 +1,5 @@
 package ru.practicum.main.service.event.controller;
 
-import client.StatsClient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,7 @@ import ru.practicum.main.service.event.service.EventService;
 import ru.practicum.main.service.event.service.param.GetEventUserParam;
 import ru.practicum.main.service.exception.BadRequestException;
 import ru.practicum.stats.dto.EndpointHitDto;
+import ru.yandex.practicum.feign.client.StatsFeignClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +37,7 @@ import static ru.practicum.main.service.Constants.DATE_PATTERN;
 public class PublicEventController {
 
     private final EventService eventService;
-    private final StatsClient statsClient;
+    private final StatsFeignClient statsClient;
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getEventsByFilters(@RequestParam(name = "text", required = false) String text,
@@ -97,6 +97,6 @@ public class PublicEventController {
         hitDto.setIp(request.getRemoteAddr());
         hitDto.setUri(request.getRequestURI());
         hitDto.setCreated(LocalDateTime.now());
-        statsClient.createHit(hitDto);
+        statsClient.hitStat(hitDto);
     }
 }
