@@ -14,8 +14,6 @@ import ru.practicum.main.service.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.main.service.Constants.*;
-
 @Data
 @Builder
 @NoArgsConstructor
