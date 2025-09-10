@@ -1,12 +1,14 @@
 package ru.practicum.main.service;
 
+import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 
-public interface Constants {
+@UtilityClass
+public class Constants {
     String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
     String DUPLICATE_USER = "Пользователь с таким Email уже существует";
     String USER_NOT_FOUND = "Пользователь не найден";

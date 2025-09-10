@@ -9,11 +9,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.main.service.Constants;
 import ru.practicum.main.service.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.main.service.Constants.DATE_PATTERN;
+import static ru.practicum.main.service.Constants.*;
 
 @Data
 @Builder
@@ -32,6 +33,6 @@ public class GetCommentDto {
     @NotBlank
     String text;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
     LocalDateTime created;
 }
