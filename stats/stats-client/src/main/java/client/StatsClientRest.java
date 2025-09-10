@@ -2,10 +2,16 @@ package client;
 
 import exception.RequestException;
 import exception.NullBodyException;
+import exception.StatsServerUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.MaxAttemptsRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import ru.practicum.stats.dto.EndpointHitDto;
@@ -13,12 +19,12 @@ import ru.practicum.stats.dto.ViewStatsDto;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static util.StatsServerPaths.PATH_BASE;
 import static util.StatsServerPaths.PATH_HIT;
 import static util.StatsServerPaths.PATH_STAT;
 
@@ -26,8 +32,16 @@ import static util.StatsServerPaths.PATH_STAT;
 @Component
 public class StatsClientRest implements StatsClient {
     private final RestClient restClient;
+    private final RetryTemplate retryTemplate;
+    private final DiscoveryClient discoveryClient;
+    private final String statsServiceId;
 
-    public StatsClientRest(@Value("${stats.url:" + PATH_BASE + "}") String statsServerUrl) {
+    public StatsClientRest(DiscoveryClient discoveryClient,
+                           @Value("${discovery.stats.stats-server-id}") String statsServiceId) {
+        this.statsServiceId = statsServiceId;
+        this.discoveryClient = discoveryClient;
+        retryTemplate = initializeRetryTemplate();
+        String statsServerUrl = makeUri("").getPath();
         log.info("stats.url = {}", statsServerUrl);
         restClient = RestClient.builder()
                 .baseUrl(statsServerUrl)
@@ -117,9 +131,40 @@ public class StatsClientRest implements StatsClient {
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             String msg = "Не удалось конвертировать тело по причине: " + e.getMessage()
-                         + " trace: " + Arrays.toString(e.getStackTrace());
+                    + " trace: " + Arrays.toString(e.getStackTrace());
             log.warn(msg);
             return msg;
+        }
+    }
+
+    private RetryTemplate initializeRetryTemplate(){
+        RetryTemplate retryTemplate = new RetryTemplate();
+
+        FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+        fixedBackOffPolicy.setBackOffPeriod(3000L);
+        retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
+
+        MaxAttemptsRetryPolicy retryPolicy = new MaxAttemptsRetryPolicy();
+        retryPolicy.setMaxAttempts(3);
+        retryTemplate.setRetryPolicy(retryPolicy);
+        return retryTemplate;
+    }
+
+    private URI makeUri(String path) {
+        ServiceInstance instance = retryTemplate.execute(cxt -> getInstance());
+        return URI.create("http://" + instance.getHost() + ":" + instance.getPort() + path);
+    }
+
+    private ServiceInstance getInstance() {
+        try {
+            return discoveryClient
+                    .getInstances(statsServiceId)
+                    .getFirst();
+        } catch (Exception exception) {
+            throw new StatsServerUnavailableException(
+                    "Ошибка обнаружения адреса сервиса статистики с id: " + statsServiceId,
+                    exception
+            );
         }
     }
 }
