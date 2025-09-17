@@ -3,12 +3,17 @@ package ru.yandex.practicum.util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.dto.comment.CommentDto;
 import ru.yandex.practicum.dto.comment.GetCommentDto;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.dto.event.ResponseEvent;
+import ru.yandex.practicum.dto.request.ConfirmedRequests;
+import ru.yandex.practicum.enums.comment.CommentSortType;
 import ru.yandex.practicum.enums.request.RequestStatus;
 import ru.practicum.stats.dto.ViewStatsDto;
+import ru.yandex.practicum.feign.client.CommentFeignClient;
+import ru.yandex.practicum.feign.client.RequestFeignClient;
 import ru.yandex.practicum.feign.client.StatsFeignClient;
 import ru.yandex.practicum.mapper.event.MapperEvent;
 import ru.yandex.practicum.model.event.Event;
@@ -29,9 +34,8 @@ import static ru.yandex.practicum.utility.Constants.MIN_START_DATE;
 @Slf4j
 public class ResponseEventBuilder {
     private final MapperEvent eventMapper;
-    private final MapperComment commentMapper;
-    private final RequestRepository requestRepository;
-    private final CommentRepository commentRepository;
+    private final RequestFeignClient requestFeignClient;
+    private final CommentFeignClient commentFeignClient;
     private final StatsFeignClient statsClient;
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
@@ -77,20 +81,20 @@ public class ResponseEventBuilder {
         });
 
         getManyEventsComments(dtoById.keySet()).forEach(comment -> {
-            T t = dtoById.get(comment.getEvent().getId());
+            T t = dtoById.get(comment);
 
             if (t.getComments() == null) {
                 t.setComments(new ArrayList<>());
             }
 
-            t.getComments().add(commentMapper.toGetCommentDto(comment));
+            t.getComments().add(comment);
         });
 
         return new ArrayList<>(dtoById.values());
     }
 
     private int getOneEventConfirmedRequests(long eventId) {
-        return requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+        return requestFeignClient.getRequestsCountByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
     }
 
     private long getOneEventViews(LocalDateTime created, long eventId) {
@@ -99,13 +103,11 @@ public class ResponseEventBuilder {
     }
 
     private List<GetCommentDto> getOneEventComments(long eventId) {
-        return commentRepository.findByEventId(eventId, DEFAULT_COMMENTS).stream()
-                .map(commentMapper::toGetCommentDto)
-                .toList();
+        return commentFeignClient.getCommentsByEventId(eventId);
     }
 
     private List<ConfirmedRequests> getManyEventsConfirmedRequests(Collection<Long> eventIds) {
-        return requestRepository.getConfirmedRequests(eventIds, RequestStatus.CONFIRMED);
+        return requestFeignClient.getConfirmedRequestsByEventId(eventIds);
     }
 
     private List<ViewStatsDto> getManyEventsViews(Collection<Long> eventIds) {
@@ -117,7 +119,7 @@ public class ResponseEventBuilder {
         return viewStats;
     }
 
-    private List<Comment> getManyEventsComments(Set<Long> eventsIds) {
-        return commentRepository.findLastCommentsForManyEvents(eventsIds);
+    private List<GetCommentDto> getManyEventsComments(Set<Long> eventsIds) {
+        return commentFeignClient.getLastCommentsForEvents(eventsIds);
     }
 }

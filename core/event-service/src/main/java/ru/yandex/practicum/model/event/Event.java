@@ -49,9 +49,8 @@ public class Event {
     @Column(nullable = false, length = 2000)
     String annotation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id", nullable = false)
-    User initiator;
+    @Column(name = "initiator_id", nullable = false)
+    Long initiatorId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)

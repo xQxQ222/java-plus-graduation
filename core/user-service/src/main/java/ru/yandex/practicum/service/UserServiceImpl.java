@@ -51,4 +51,11 @@ public class UserServiceImpl implements UserService {
 
         userRepository.deleteById(userId);
     }
+
+    @Override
+    public UserDto getUserById(Long userId) {
+        User userFromDb = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(Constants.USER_NOT_FOUND));
+        return mapperUser.toUserDto(userFromDb);
+    }
 }

@@ -6,7 +6,7 @@ import org.mapstruct.MappingConstants;
 import ru.yandex.practicum.dto.compilation.CompilationDto;
 import ru.yandex.practicum.dto.compilation.NewCompilationDto;
 import ru.yandex.practicum.dto.compilation.UpdateCompilationRequest;
-import ru.yandex.practicum.model.Compilation;
+import ru.yandex.practicum.model.compilation.Compilation;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface MapperCompilation {

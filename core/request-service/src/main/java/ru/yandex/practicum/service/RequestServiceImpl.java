@@ -3,25 +3,31 @@ package ru.yandex.practicum.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.dto.event.EventFullDto;
+import ru.yandex.practicum.dto.request.ConfirmedRequests;
+import ru.yandex.practicum.dto.user.UserDto;
 import ru.yandex.practicum.enums.event.EventState;
 import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.DuplicateException;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.enums.request.RequestStatus;
+import ru.yandex.practicum.feign.client.EventFeignClient;
+import ru.yandex.practicum.feign.client.UserFeignClient;
 import ru.yandex.practicum.mapper.MapperRequest;
 import ru.yandex.practicum.model.Request;
 import ru.yandex.practicum.repository.RequestRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
-    private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final EventFeignClient eventFeignClient;
+    private final UserFeignClient userFeignClient;
     private final MapperRequest mapperRequest;
 
     @Override
@@ -34,11 +40,9 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ParticipationRequestDto createParticipationRequest(Long userId, Long eventId) {
 
-        Event event = eventRepository.findById(eventId).orElseThrow(() ->
-                new NotFoundException("Событие не найдено"));
+        EventFullDto event = eventFeignClient.getEventById(eventId).getBody();
 
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("Пользователь не найден!"));
+        UserDto user = userFeignClient.getUserById(userId);
 
         if (requestRepository.existsByEventIdAndRequesterId(eventId, userId)) {
             throw new DuplicateException("Запрос на такое событие уже есть");
@@ -50,7 +54,7 @@ public class RequestServiceImpl implements RequestService {
 
 
         if (event.getParticipantLimit() != 0 && requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED)
-                                                >= event.getParticipantLimit()) {
+                >= event.getParticipantLimit()) {
             throw new ConflictException("Достигнут лимит запросов на событие");
         }
 
@@ -61,8 +65,8 @@ public class RequestServiceImpl implements RequestService {
         boolean isPreModerationOn = isPreModerationOn(event.getRequestModeration(), event.getParticipantLimit());
         Request request = new Request(
                 null,
-                user,
-                event,
+                user.getId(),
+                event.getId(),
                 isPreModerationOn ? RequestStatus.PENDING : RequestStatus.CONFIRMED,
                 LocalDateTime.now()
         );
@@ -78,15 +82,30 @@ public class RequestServiceImpl implements RequestService {
         Request request = requestRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException("Запрос не найден"));
 
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        userFeignClient.getUserById(userId); //Будет проверять, существует ли пользователь
 
         request.setStatus(RequestStatus.CANCELED);
 
         request = requestRepository.save(request);
 
         return mapperRequest.toParticipationRequestDto(request);
+    }
+
+    @Override
+    public List<ParticipationRequestDto> getRequestsByEventId(Long eventId) {
+        return requestRepository.findAllByEventId(eventId).stream()
+                .map(mapperRequest::toParticipationRequestDto)
+                .toList();
+    }
+
+    @Override
+    public int getRequestsCountByEventIdAndStatus(Long eventId, RequestStatus status) {
+        return requestRepository.countByEventIdAndStatus(eventId, status);
+    }
+
+    @Override
+    public List<ConfirmedRequests> getConfirmedRequestsByEventId(Collection<Long> eventIds) {
+        return requestRepository.getConfirmedRequests(eventIds, RequestStatus.CONFIRMED);
     }
 
     private boolean isPreModerationOn(boolean moderationStatus, int limit) {

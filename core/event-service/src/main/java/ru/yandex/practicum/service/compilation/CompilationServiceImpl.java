@@ -9,11 +9,16 @@ import ru.yandex.practicum.dto.compilation.CompilationDto;
 import ru.yandex.practicum.dto.compilation.NewCompilationDto;
 import ru.yandex.practicum.dto.compilation.UpdateCompilationRequest;
 import ru.yandex.practicum.exception.NotFoundException;
-import ru.yandex.practicum.mapper.MapperCompilation;
-import ru.yandex.practicum.model.Compilation;
-import ru.yandex.practicum.repository.CompilationRepository;
+import ru.yandex.practicum.mapper.compilation.MapperCompilation;
+import ru.yandex.practicum.model.compilation.Compilation;
+import ru.yandex.practicum.model.compilation.QCompilation;
+import ru.yandex.practicum.model.event.Event;
+import ru.yandex.practicum.model.event.QEvent;
+import ru.yandex.practicum.repository.compilation.CompilationRepository;
+import ru.yandex.practicum.repository.event.EventRepository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Slf4j

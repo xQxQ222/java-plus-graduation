@@ -16,6 +16,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import ru.yandex.practicum.model.event.Event;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "compilations")

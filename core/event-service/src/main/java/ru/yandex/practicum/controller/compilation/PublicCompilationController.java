@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.dto.compilation.CompilationDto;
-import ru.yandex.practicum.service.CompilationService;
-import ru.yandex.practicum.service.GetCompilationsParam;
+import ru.yandex.practicum.service.compilation.CompilationService;
+import ru.yandex.practicum.service.compilation.GetCompilationsParam;
 
 import java.util.List;
 

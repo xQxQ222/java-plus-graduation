@@ -7,9 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.dto.user.UserDto;
+import ru.yandex.practicum.feign.client.RequestFeignClient;
+import ru.yandex.practicum.feign.client.UserFeignClient;
 import ru.yandex.practicum.mapper.event.MapperEvent;
 import ru.yandex.practicum.model.category.Category;
 import ru.yandex.practicum.model.event.Event;
+import ru.yandex.practicum.model.event.QEvent;
 import ru.yandex.practicum.repository.category.CategoryRepository;
 import ru.yandex.practicum.repository.event.EventRepository;
 import ru.yandex.practicum.repository.location.LocationRepository;
@@ -42,7 +46,6 @@ import static ru.yandex.practicum.utility.Constants.EVENT_NOT_FOUND;
 import static ru.yandex.practicum.dto.event.UpdateEventUserRequest.StateAction.SEND_TO_REVIEW;
 import static ru.yandex.practicum.enums.event.EventState.CANCELED;
 import static ru.yandex.practicum.enums.event.EventState.PENDING;
-import static ru.practicum.main.service.event.util.ValidatorEventTime.isEventTimeBad;
 import static ru.yandex.practicum.dto.event.UpdateEventAdminRequest.StateAction.PUBLISH_EVENT;
 import static ru.yandex.practicum.enums.event.EventState.PUBLISHED;
 import static ru.yandex.practicum.enums.event.EventState.REJECTED;
@@ -54,9 +57,8 @@ import static ru.yandex.practicum.enums.event.EventState.REJECTED;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final MapperEvent eventMapper;
-    private final RequestRepository requestRepository;
-    private final MapperRequest requestMapper;
-    private final UserRepository userRepository;
+    private final RequestFeignClient requestFeignClient;
+    private final UserFeignClient userFeignClient;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final ResponseEventBuilder responseEventBuilder;
@@ -66,7 +68,7 @@ public class EventServiceImpl implements EventService {
         QEvent event = QEvent.event;
         BooleanBuilder requestBuilder = new BooleanBuilder();
         if (param.hasUsers()) {
-            requestBuilder.and(event.initiator.id.in(param.getUsers()));
+            requestBuilder.and(event.initiatorId.in(param.getUsers()));
         }
 
         if (param.hasStates()) {
@@ -146,9 +148,8 @@ public class EventServiceImpl implements EventService {
                 () -> new NotFoundException(CATEGORY_NOT_FOUND));
         event.setCategory(category);
 
-        User initiator = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(Constants.USER_NOT_FOUND));
-        event.setInitiator(initiator);
+        UserDto initiator = userFeignClient.getUserById(userId);
+        event.setInitiatorId(initiator.getId());
 
         event.getLocation().setEvent(event);
         locationRepository.save(event.getLocation());
@@ -198,8 +199,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
-        List<Request> requests = requestRepository.findAllByEventId(eventId);
-        return requests.stream().map(requestMapper::toParticipationRequestDto).toList();
+        return requestFeignClient.getRequestsByEventId(eventId);
     }
 
     @Override
@@ -214,8 +214,8 @@ public class EventServiceImpl implements EventService {
             return result;
         }
 
-        List<Request> requestsAll = requestRepository.findAllByEventId(eventId);
-        List<Request> requestsStatusPending = requestsAll.stream()
+        List<ParticipationRequestDto> requestsAll = requestFeignClient.getRequestsByEventId(eventId);
+        List<ParticipationRequestDto> requestsStatusPending = requestsAll.stream()
                 .filter(r -> r.getStatus() == RequestStatus.PENDING)
                 .filter(r -> updateRequest.getRequestIds().contains(r.getId()))
                 .toList();
@@ -225,10 +225,9 @@ public class EventServiceImpl implements EventService {
         }
 
         if (updateRequest.getStatus().equals(EventRequestStatusUpdateRequest.Status.REJECTED)) {
-            for (Request request : requestsStatusPending) {
+            for (ParticipationRequestDto request : requestsStatusPending) {
                 request.setStatus(RequestStatus.REJECTED);
-                ParticipationRequestDto dto = requestMapper.toParticipationRequestDto(request);
-                result.getRejectedRequests().add(dto);
+                result.getRejectedRequests().add(request);
             }
 
             return result;
@@ -246,22 +245,20 @@ public class EventServiceImpl implements EventService {
 
         int idx = 0;
         while (idx < requestsStatusPending.size() && limitLeft > 0) {
-            Request request = requestsStatusPending.get(idx);
+            ParticipationRequestDto request = requestsStatusPending.get(idx);
             request.setStatus(RequestStatus.CONFIRMED);
 
-            ParticipationRequestDto dto = requestMapper.toParticipationRequestDto(request);
-            result.getConfirmedRequests().add(dto);
+            result.getConfirmedRequests().add(request);
 
             limitLeft--;
             idx++;
         }
 
         while (idx < requestsStatusPending.size()) {
-            Request request = requestsStatusPending.get(idx);
+            ParticipationRequestDto request = requestsStatusPending.get(idx);
             request.setStatus(RequestStatus.CANCELED);
 
-            ParticipationRequestDto dto = requestMapper.toParticipationRequestDto(request);
-            result.getRejectedRequests().add(dto);
+            result.getRejectedRequests().add(request);
 
             idx++;
         }
@@ -328,8 +325,8 @@ public class EventServiceImpl implements EventService {
         }
 
         if (param.hasLocation()) {
-            event.getLocation().setLatitude(param.getLocation().getLatitude());
-            event.getLocation().setLongitude(param.getLocation().getLongitude());
+            event.getLocation().setLatitude(param.getLocation().getLat());
+            event.getLocation().setLongitude(param.getLocation().getLon());
         }
 
         if (param.hasPaid()) {

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.dto.compilation.CompilationDto;
 import ru.yandex.practicum.dto.compilation.NewCompilationDto;
 import ru.yandex.practicum.dto.compilation.UpdateCompilationRequest;
-import ru.yandex.practicum.service.CompilationService;
+import ru.yandex.practicum.service.compilation.CompilationService;
 
 @Validated
 @Slf4j

@@ -5,6 +5,7 @@ import ru.yandex.practicum.dto.comment.GetCommentDto;
 import ru.yandex.practicum.enums.comment.CommentSortType;
 
 import java.util.List;
+import java.util.Set;
 
 public interface CommentService {
     GetCommentDto addNewComment(Long userId, Long eventId, CommentDto commentDto);
@@ -18,4 +19,6 @@ public interface CommentService {
     GetCommentDto getCommentById(Long eventId, Long commentId);
 
     List<GetCommentDto> getEventComments(Long eventId, Integer from, Integer size, CommentSortType sort);
+
+    List<GetCommentDto> getCommentsByEventsIds(Set<Long> eventsId);
 }

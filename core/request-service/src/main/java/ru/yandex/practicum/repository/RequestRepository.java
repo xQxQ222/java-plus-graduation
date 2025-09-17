@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.yandex.practicum.enums.request.RequestStatus;
-import ru.yandex.practicum.model.ConfirmedRequests;
+import ru.yandex.practicum.dto.request.ConfirmedRequests;
 import ru.yandex.practicum.model.Request;
 
 import java.util.Collection;
