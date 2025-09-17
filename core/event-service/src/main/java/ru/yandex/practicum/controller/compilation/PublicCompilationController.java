@@ -1,4 +1,4 @@
-package ru.yandex.practicum.controller;
+package ru.yandex.practicum.controller.compilation;
 
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;

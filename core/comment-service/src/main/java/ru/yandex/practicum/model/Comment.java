@@ -2,12 +2,9 @@ package ru.yandex.practicum.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,8 +13,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -36,15 +31,11 @@ public class Comment {
     @Column(name = "comment_id")
     Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", referencedColumnName = "user_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    User author;
+    @Column(name = "author_id", nullable = false)
+    Long authorId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", referencedColumnName = "event_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    Event event;
+    @Column(name = "event_id", nullable = false)
+    Long eventId;
 
     @Column(nullable = false, length = 5000)
     String text;
