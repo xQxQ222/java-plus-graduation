@@ -21,7 +21,7 @@ import ru.yandex.practicum.service.CommentService;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/users/{userId}/events/{eventId}")
+@RequestMapping("/comments/users/{userId}/events/{eventId}")
 @Validated
 @Slf4j
 public class PrivateCommentController {

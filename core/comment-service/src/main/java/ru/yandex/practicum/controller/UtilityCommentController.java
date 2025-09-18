@@ -3,7 +3,6 @@ package ru.yandex.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.dto.comment.CommentDto;
 import ru.yandex.practicum.dto.comment.GetCommentDto;
 import ru.yandex.practicum.enums.comment.CommentSortType;
 import ru.yandex.practicum.service.CommentService;
@@ -15,7 +14,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/comments")
 @RequiredArgsConstructor
-public class UtilityController {
+public class UtilityCommentController {
 
     private final CommentService commentService;
 

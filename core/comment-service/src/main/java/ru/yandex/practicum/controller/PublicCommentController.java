@@ -19,7 +19,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/events/{eventId}/comments")
+@RequestMapping("/comments/events/{eventId}")
 @Slf4j
 @Validated
 public class PublicCommentController {

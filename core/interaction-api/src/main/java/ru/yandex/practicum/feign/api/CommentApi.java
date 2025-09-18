@@ -3,7 +3,6 @@ package ru.yandex.practicum.feign.api;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.dto.comment.CommentDto;
 import ru.yandex.practicum.dto.comment.GetCommentDto;
 
 import java.util.List;

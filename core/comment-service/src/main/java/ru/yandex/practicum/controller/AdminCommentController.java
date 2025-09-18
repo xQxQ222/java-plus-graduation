@@ -14,7 +14,7 @@ import ru.yandex.practicum.service.CommentService;
 
 @Slf4j
 @RestController
-@RequestMapping("/admin/events/{eventId}/comments")
+@RequestMapping("/admin/comments/event/{eventId}")
 @RequiredArgsConstructor
 @Validated
 public class AdminCommentController {
