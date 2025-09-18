@@ -149,7 +149,7 @@ public class EventServiceImpl implements EventService {
         event.setCategory(category);
 
         UserDto initiator = userFeignClient.getUserById(userId);
-        event.setInitiatorId(initiator.getId());
+        event.setInitiatorId(userId);
 
         event.getLocation().setEvent(event);
         locationRepository.save(event.getLocation());

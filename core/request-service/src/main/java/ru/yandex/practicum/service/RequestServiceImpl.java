@@ -65,8 +65,8 @@ public class RequestServiceImpl implements RequestService {
         boolean isPreModerationOn = isPreModerationOn(event.getRequestModeration(), event.getParticipantLimit());
         Request request = new Request(
                 null,
-                user.getId(),
-                event.getId(),
+                userId,
+                eventId,
                 isPreModerationOn ? RequestStatus.PENDING : RequestStatus.CONFIRMED,
                 LocalDateTime.now()
         );
