@@ -6,8 +6,7 @@ spring:
         - id: comment_service_route
           uri: lb://comment-service
           predicates:
-            - Path=/admin/comments/**
-            - Path=/comments/**
+            - Path=/admin/comments/**, /comments/**
 
         - id: user_service_route
           uri: lb://user-service
@@ -22,13 +21,7 @@ spring:
         - id: event_service_route
           uri: lb://event-service
           predicates:
-            - Path=/admin/categories/**
-            - Path=/categories/**
-            - Path=/admin/compilations/**
-            - Path=/compilations/**
-            - Path=/admin/events/**
-            - Path=/events/**
-            - Path=/users/{userId}/events/**
+            - Path=/admin/categories/**, /categories/**, /admin/compilations/**, /compilations/**, /admin/events/**, /events/**, /users/{userId}/events/**
 
 server:
   port: 8080
