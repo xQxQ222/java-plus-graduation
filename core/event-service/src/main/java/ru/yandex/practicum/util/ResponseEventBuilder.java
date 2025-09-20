@@ -39,15 +39,15 @@ public class ResponseEventBuilder {
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
         T dto;
-
+        UserShortDto initiator = new UserShortDto();
+        initiator.setId(event.getInitiatorId());
         if (type == EventFullDto.class) {
             EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
-            UserShortDto initiator = new UserShortDto();
-            initiator.setId(event.getInitiatorId());
             dtoTemp.setInitiator(initiator);
             dto = type.cast(dtoTemp);
         } else {
             EventShortDto dtoTemp = eventMapper.toEventShortDto(event);
+            dtoTemp.setInitiator(initiator);
             dto = type.cast(dtoTemp);
         }
 
