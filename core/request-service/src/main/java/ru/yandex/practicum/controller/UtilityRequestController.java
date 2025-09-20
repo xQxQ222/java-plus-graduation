@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.request.ConfirmedRequests;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.enums.request.RequestStatus;
+import ru.yandex.practicum.feign.api.RequestApi;
 import ru.yandex.practicum.service.RequestService;
 
 import java.util.Collection;
@@ -13,9 +14,9 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/requests")
+@RequestMapping("/utility/requests")
 @RequiredArgsConstructor
-public class UtilityRequestController {
+public class UtilityRequestController implements RequestApi {
 
     private final RequestService requestService;
 
@@ -28,7 +29,7 @@ public class UtilityRequestController {
     }
 
     @GetMapping("/{eventId}/count")
-    public int getRequestsCountByEventIdAndStatus(@PathVariable Long eventId, @RequestBody RequestStatus status) {
+    public int getRequestsCountByEventIdAndStatus(@PathVariable Long eventId, @RequestParam(name = "status") RequestStatus status) {
         log.info("Пришел GET апрос на /requests/{}/count с телом: {}", eventId, status);
         int count = requestService.getRequestsCountByEventIdAndStatus(eventId, status);
         log.info("Для мероприятия с id {} найдено {} заявок со статусом {}", eventId, count, status);
@@ -36,7 +37,7 @@ public class UtilityRequestController {
     }
 
     @GetMapping("/confirmed")
-    public List<ConfirmedRequests> getConfirmedRequestsByEventId(@RequestBody Collection<Long> eventsIds) {
+    public List<ConfirmedRequests> getConfirmedRequestsByEventId(@RequestParam(name = "ids") Collection<Long> eventsIds) {
         log.info("Пришел GET запрос на /requests/confirmed с телом: {}", eventsIds);
         List<ConfirmedRequests> confirmedRequests = requestService.getConfirmedRequestsByEventId(eventsIds);
         log.info("Для мероприятий с id ({}) нашлись комментарии: одобренные заявки: {}", eventsIds, confirmedRequests);

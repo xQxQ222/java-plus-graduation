@@ -8,6 +8,7 @@ import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.dto.event.ResponseEvent;
 import ru.yandex.practicum.dto.request.ConfirmedRequests;
+import ru.yandex.practicum.dto.user.UserShortDto;
 import ru.yandex.practicum.enums.request.RequestStatus;
 import ru.practicum.stats.dto.ViewStatsDto;
 import ru.yandex.practicum.feign.client.CommentFeignClient;
@@ -41,6 +42,9 @@ public class ResponseEventBuilder {
 
         if (type == EventFullDto.class) {
             EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
+            UserShortDto initiator = new UserShortDto();
+            initiator.setId(event.getInitiatorId());
+            dtoTemp.setInitiator(initiator);
             dto = type.cast(dtoTemp);
         } else {
             EventShortDto dtoTemp = eventMapper.toEventShortDto(event);

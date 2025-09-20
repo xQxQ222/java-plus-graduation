@@ -14,6 +14,7 @@ import ru.yandex.practicum.mapper.event.MapperEvent;
 import ru.yandex.practicum.model.category.Category;
 import ru.yandex.practicum.model.event.Event;
 import ru.yandex.practicum.model.event.QEvent;
+import ru.yandex.practicum.model.location.Location;
 import ru.yandex.practicum.repository.category.CategoryRepository;
 import ru.yandex.practicum.repository.event.EventRepository;
 import ru.yandex.practicum.repository.location.LocationRepository;
@@ -139,6 +140,10 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto addNewEvent(Long userId, NewEventDto eventDto) {
         Event event = eventMapper.toEvent(eventDto);
+        Location location = new Location();
+        location.setLatitude(eventDto.getLocation().getLat());
+        location.setLongitude(eventDto.getLocation().getLon());
+        event.setLocation(location);
 
         if (ValidatorEventTime.isEventTimeBad(eventDto.getEventDate(), 2)) {
             throw new BadRequestException("Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента");
@@ -270,6 +275,7 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventById(Long eventId) {
         Event eventDomain = eventRepository.findByIdAndState(eventId, PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(Constants.EVENT_NOT_FOUND));
+
         return responseEventBuilder.buildOneEventResponseDto(eventDomain, EventFullDto.class);
     }
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.comment.GetCommentDto;
 import ru.yandex.practicum.enums.comment.CommentSortType;
+import ru.yandex.practicum.feign.api.CommentApi;
 import ru.yandex.practicum.service.CommentService;
 
 import java.util.List;
@@ -12,14 +13,14 @@ import java.util.Set;
 
 @Slf4j
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/utility/comments")
 @RequiredArgsConstructor
-public class UtilityCommentController {
+public class UtilityCommentController implements CommentApi {
 
     private final CommentService commentService;
 
-    @GetMapping("/events/last")
-    public List<GetCommentDto> getLastCommentsForEvents(@RequestBody Set<Long> eventsId) {
+    @GetMapping("/event/last")
+    public List<GetCommentDto> getLastCommentsForEvents(@RequestParam(name = "ids") Set<Long> eventsId) {
         log.info("Пришел GET запрос на /comments/events/last с телом: {}", eventsId);
         List<GetCommentDto> comments = commentService.getCommentsByEventsIds(eventsId);
         log.info("Для мероприятий с id ({}) найдены следующие комментарии: {}", eventsId, comments);

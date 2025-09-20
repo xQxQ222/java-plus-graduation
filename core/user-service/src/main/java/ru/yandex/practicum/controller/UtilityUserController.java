@@ -11,7 +11,7 @@ import ru.yandex.practicum.service.UserService;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/utility/users")
 @RequiredArgsConstructor
 public class UtilityUserController {
     private final UserService userService;
