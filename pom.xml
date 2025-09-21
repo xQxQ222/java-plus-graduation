@@ -14,8 +14,8 @@
 	<modules>
         <module>stats</module>
         <module>infra</module>
-		    <module>core</module>
-    </modules>
+		<module>core</module>
+	</modules>
 
 	<groupId>ru.yandex.practicum</groupId>
 	<artifactId>explore-with-me</artifactId>
