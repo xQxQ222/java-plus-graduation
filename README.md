@@ -9,6 +9,7 @@
 
 Таблица использованиями сервисов Feign клиентов:
 | |Comment Feign|Event Feign|Request Feign|User Feign|Stats Feign|
+|---------------|:-:|:-:|:-:|:-:|:-:|
 |Comment-service| |+|-|+|-|
 |Event-service|-| |+|+|+|
 |Request-service|-|+| |+|-|
