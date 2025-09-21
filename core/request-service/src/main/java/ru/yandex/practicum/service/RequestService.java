@@ -19,4 +19,6 @@ public interface RequestService {
     int getRequestsCountByEventIdAndStatus(Long eventId, RequestStatus status);
 
     List<ConfirmedRequests> getConfirmedRequestsByEventId(Collection<Long> eventIds);
+
+    ParticipationRequestDto changeRequestStatus(Long requestId, RequestStatus status);
 }

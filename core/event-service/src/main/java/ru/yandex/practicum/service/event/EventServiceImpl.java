@@ -259,15 +259,15 @@ public class EventServiceImpl implements EventService {
             request.setStatus(RequestStatus.CONFIRMED);
 
             result.getConfirmedRequests().add(request);
-
+            requestFeignClient.updateRequestStatus(request.getId(), RequestStatus.CONFIRMED);
             limitLeft--;
             idx++;
         }
 
         while (idx < requestsStatusPending.size()) {
             ParticipationRequestDto request = requestsStatusPending.get(idx);
-            request.setStatus(RequestStatus.CANCELED);
-
+            request.setStatus(RequestStatus.REJECTED);
+            requestFeignClient.updateRequestStatus(request.getId(), RequestStatus.REJECTED);
             result.getRejectedRequests().add(request);
 
             idx++;

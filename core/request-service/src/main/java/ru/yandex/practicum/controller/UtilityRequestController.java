@@ -20,17 +20,17 @@ public class UtilityRequestController implements RequestApi {
 
     private final RequestService requestService;
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/event/{eventId}")
     public List<ParticipationRequestDto> getRequestsByEventId(@PathVariable Long eventId) {
-        log.info("Пришел GET запрос на /requests/{}", eventId);
+        log.info("Пришел GET запрос на /utility/requests/event/{}", eventId);
         List<ParticipationRequestDto> requests = requestService.getRequestsByEventId(eventId);
         log.info("Получен список заявок на мероприятие с id {}: {}", eventId, requests);
         return requests;
     }
 
-    @GetMapping("/{eventId}/count")
+    @GetMapping("/event/{eventId}/count")
     public int getRequestsCountByEventIdAndStatus(@PathVariable Long eventId, @RequestParam(name = "status") RequestStatus status) {
-        log.info("Пришел GET апрос на /requests/{}/count с телом: {}", eventId, status);
+        log.info("Пришел GET апрос на /utility/requests/event/{}/count с телом: {}", eventId, status);
         int count = requestService.getRequestsCountByEventIdAndStatus(eventId, status);
         log.info("Для мероприятия с id {} найдено {} заявок со статусом {}", eventId, count, status);
         return count;
@@ -38,9 +38,17 @@ public class UtilityRequestController implements RequestApi {
 
     @GetMapping("/confirmed")
     public List<ConfirmedRequests> getConfirmedRequestsByEventId(@RequestParam(name = "ids") Collection<Long> eventsIds) {
-        log.info("Пришел GET запрос на /requests/confirmed с телом: {}", eventsIds);
+        log.info("Пришел GET запрос на /utility/requests/confirmed с телом: {}", eventsIds);
         List<ConfirmedRequests> confirmedRequests = requestService.getConfirmedRequestsByEventId(eventsIds);
         log.info("Для мероприятий с id ({}) нашлись комментарии: одобренные заявки: {}", eventsIds, confirmedRequests);
         return confirmedRequests;
+    }
+
+    @PutMapping("/{requestId}/confirm")
+    public ParticipationRequestDto updateRequestStatus(@PathVariable Long requestId, @RequestBody RequestStatus status) {
+        log.info("Пришел PATCH запрос на /utility/requests/{}/confirm?status={}", requestId, status);
+        ParticipationRequestDto request = requestService.changeRequestStatus(requestId, status);
+        log.info("Статус заявки с id {} изменен на {}", requestId, request.getStatus());
+        return request;
     }
 }

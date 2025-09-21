@@ -12,6 +12,7 @@ public class Constants {
     public static final String USER_NOT_FOUND = "Пользователь не найден";
     public static final String EVENT_NOT_FOUND = "Событие не найдено";
     public static final String CATEGORY_NOT_FOUND = "Категория не найдена";
+    public static final String REQUEST_NOT_FOUND = "Заявка не найдена";
     public static final String COMMENT_NOT_FOUND = "Комментарий не найден";
     public static final String COMMENT_EVENT_NOT_MATCH = "Мероприятие к которому был написан комментарий не совпадает с указанным в запросе";
     public static final String COMMENT_AUTHOR_NOT_MATCH = "Автор комментария не совпадает с пользователем, указанным в запросе";

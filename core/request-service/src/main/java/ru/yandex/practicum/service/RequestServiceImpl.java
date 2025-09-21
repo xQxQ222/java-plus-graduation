@@ -17,6 +17,7 @@ import ru.yandex.practicum.feign.client.UserFeignClient;
 import ru.yandex.practicum.mapper.MapperRequest;
 import ru.yandex.practicum.model.Request;
 import ru.yandex.practicum.repository.RequestRepository;
+import ru.yandex.practicum.utility.Constants;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -84,7 +85,7 @@ public class RequestServiceImpl implements RequestService {
 
         userFeignClient.getUserById(userId); //Будет проверять, существует ли пользователь
 
-        if(!request.getStatus().equals(RequestStatus.PENDING)){
+        if (!request.getStatus().equals(RequestStatus.PENDING)) {
             throw new ConflictException("Нельзя отменить заявку, т.к. ее статус не PENDING");
         }
 
@@ -109,6 +110,17 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<ConfirmedRequests> getConfirmedRequestsByEventId(Collection<Long> eventIds) {
         return requestRepository.getConfirmedRequests(eventIds, RequestStatus.CONFIRMED);
+    }
+
+    @Override
+    public ParticipationRequestDto changeRequestStatus(Long requestId, RequestStatus status) {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException(Constants.REQUEST_NOT_FOUND));
+        if (request.getStatus() != RequestStatus.PENDING) {
+            throw new ConflictException("Чтобы поменять статус заявки, она должна быть в статусе PENDING");
+        }
+        request.setStatus(status);
+        return mapperRequest.toParticipationRequestDto(requestRepository.save(request));
     }
 
     private boolean isPreModerationOn(boolean moderationStatus, int limit) {
