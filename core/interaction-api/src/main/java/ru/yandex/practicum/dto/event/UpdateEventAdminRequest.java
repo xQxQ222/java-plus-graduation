@@ -2,7 +2,9 @@ package ru.yandex.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.yandex.practicum.validator.SizeAfterTrim;
 
@@ -12,6 +14,8 @@ import static ru.yandex.practicum.utility.Constants.DATE_PATTERN;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class UpdateEventAdminRequest {
 
     @SizeAfterTrim(min = 20, max = 2000)

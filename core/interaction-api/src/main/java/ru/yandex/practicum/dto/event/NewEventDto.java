@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.yandex.practicum.enums.event.EventState;
 import ru.yandex.practicum.validator.SizeAfterTrim;
@@ -16,6 +18,8 @@ import static ru.yandex.practicum.utility.Constants.DATE_PATTERN;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class NewEventDto {
 
     @NotBlank

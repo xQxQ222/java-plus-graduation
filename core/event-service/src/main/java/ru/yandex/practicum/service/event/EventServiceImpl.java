@@ -204,6 +204,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(()->new NotFoundException(EVENT_NOT_FOUND));
+        if(!event.getInitiatorId().equals(userId)){
+            throw new ConflictException("Пользователь не может смотреть заявки на мероприятие, если он не является его инициатором");
+        }
         return requestFeignClient.getRequestsByEventId(eventId);
     }
 
