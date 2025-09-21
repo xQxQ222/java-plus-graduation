@@ -1,5 +1,6 @@
 package ru.yandex.practicum.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationDto {
-    Double lat;
-    Double lon;
+    @JsonProperty(value = "lat")
+    Double latitude;
+
+    @JsonProperty(value = "lon")
+    Double longitude;
 }

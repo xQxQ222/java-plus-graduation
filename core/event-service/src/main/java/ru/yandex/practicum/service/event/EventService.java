@@ -35,4 +35,6 @@ public interface EventService {
     EventRequestStatusUpdateResult updateEventRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequest);
 
     EventFullDto getEventById(Long eventId);
+
+    EventFullDto getEventByIdAnyState(Long eventId);
 }

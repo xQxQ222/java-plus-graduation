@@ -84,6 +84,10 @@ public class RequestServiceImpl implements RequestService {
 
         userFeignClient.getUserById(userId); //Будет проверять, существует ли пользователь
 
+        if(!request.getStatus().equals(RequestStatus.PENDING)){
+            throw new ConflictException("Нельзя отменить заявку, т.к. ее статус не PENDING");
+        }
+
         request.setStatus(RequestStatus.CANCELED);
 
         request = requestRepository.save(request);

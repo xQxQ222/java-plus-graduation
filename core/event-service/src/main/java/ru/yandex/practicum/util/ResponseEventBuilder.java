@@ -8,12 +8,14 @@ import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.dto.event.ResponseEvent;
 import ru.yandex.practicum.dto.request.ConfirmedRequests;
+import ru.yandex.practicum.dto.user.UserDto;
 import ru.yandex.practicum.dto.user.UserShortDto;
 import ru.yandex.practicum.enums.request.RequestStatus;
 import ru.practicum.stats.dto.ViewStatsDto;
 import ru.yandex.practicum.feign.client.CommentFeignClient;
 import ru.yandex.practicum.feign.client.RequestFeignClient;
 import ru.yandex.practicum.feign.client.StatsFeignClient;
+import ru.yandex.practicum.feign.client.UserFeignClient;
 import ru.yandex.practicum.mapper.event.MapperEvent;
 import ru.yandex.practicum.model.event.Event;
 
@@ -35,12 +37,15 @@ public class ResponseEventBuilder {
     private final MapperEvent eventMapper;
     private final RequestFeignClient requestFeignClient;
     private final CommentFeignClient commentFeignClient;
+    private final UserFeignClient userFeignClient;
     private final StatsFeignClient statsClient;
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
         T dto;
+        UserDto user = userFeignClient.getUserById(event.getInitiatorId());
         UserShortDto initiator = new UserShortDto();
-        initiator.setId(event.getInitiatorId());
+        initiator.setId(user.getId());
+        initiator.setName(user.getName());
         if (type == EventFullDto.class) {
             EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
             dtoTemp.setInitiator(initiator);
@@ -64,11 +69,14 @@ public class ResponseEventBuilder {
         Map<Long, T> dtoById = new HashMap<>();
 
         for (Event event : events) {
+            UserDto initiator = userFeignClient.getUserById(event.getInitiatorId());
             if (type == EventFullDto.class) {
                 EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
+                dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             } else {
                 EventShortDto dtoTemp = eventMapper.toEventShortDto(event);
+                dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             }
         }
@@ -101,15 +109,17 @@ public class ResponseEventBuilder {
 
     private long getOneEventViews(LocalDateTime created, long eventId) {
         List<ViewStatsDto> viewStats = statsClient.getStats(created.minusMinutes(1), LocalDateTime.now().plusMinutes(1), List.of("/events/" + eventId), true).getBody();
-        return viewStats.isEmpty() ? 0 : viewStats.getFirst().getHits();
+        return viewStats == null || viewStats.isEmpty() ? 0 : viewStats.getFirst().getHits();
     }
 
     private List<GetCommentDto> getOneEventComments(long eventId) {
-        return commentFeignClient.getCommentsByEventId(eventId);
+        List<GetCommentDto> comments = commentFeignClient.getCommentsByEventId(eventId);
+        return comments == null ? new ArrayList<>() : comments;
     }
 
     private List<ConfirmedRequests> getManyEventsConfirmedRequests(Collection<Long> eventIds) {
-        return requestFeignClient.getConfirmedRequestsByEventId(eventIds);
+        List<ConfirmedRequests> requests = requestFeignClient.getConfirmedRequestsByEventId(eventIds);
+        return requests == null ? new ArrayList<>() : requests;
     }
 
     private List<ViewStatsDto> getManyEventsViews(Collection<Long> eventIds) {
@@ -117,8 +127,7 @@ public class ResponseEventBuilder {
                 .map(id -> "/events/" + id)
                 .toList();
 
-        List<ViewStatsDto> viewStats = statsClient.getStats(MIN_START_DATE, LocalDateTime.now().plusMinutes(1), uris, true).getBody();
-        return viewStats;
+        return statsClient.getStats(MIN_START_DATE, LocalDateTime.now().plusMinutes(1), uris, true).getBody();
     }
 
     private List<GetCommentDto> getManyEventsComments(Set<Long> eventsIds) {

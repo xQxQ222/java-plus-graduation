@@ -141,8 +141,8 @@ public class EventServiceImpl implements EventService {
     public EventFullDto addNewEvent(Long userId, NewEventDto eventDto) {
         Event event = eventMapper.toEvent(eventDto);
         Location location = new Location();
-        location.setLatitude(eventDto.getLocation().getLat());
-        location.setLongitude(eventDto.getLocation().getLon());
+        location.setLatitude(eventDto.getLocation().getLatitude());
+        location.setLongitude(eventDto.getLocation().getLongitude());
         event.setLocation(location);
 
         if (ValidatorEventTime.isEventTimeBad(eventDto.getEventDate(), 2)) {
@@ -205,8 +205,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(()->new NotFoundException(EVENT_NOT_FOUND));
-        if(!event.getInitiatorId().equals(userId)){
+                .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND));
+        if (!event.getInitiatorId().equals(userId)) {
             throw new ConflictException("Пользователь не может смотреть заявки на мероприятие, если он не является его инициатором");
         }
         return requestFeignClient.getRequestsByEventId(eventId);
@@ -285,6 +285,13 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public EventFullDto getEventByIdAnyState(Long eventId) {
+        Event eventDomain = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND));
+        return responseEventBuilder.buildOneEventResponseDto(eventDomain, EventFullDto.class);
+    }
+
+    @Override
     @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequest updateDto) {
         Event event = eventRepository.findById(eventId)
@@ -336,8 +343,8 @@ public class EventServiceImpl implements EventService {
         }
 
         if (param.hasLocation()) {
-            event.getLocation().setLatitude(param.getLocation().getLat());
-            event.getLocation().setLongitude(param.getLocation().getLon());
+            event.getLocation().setLatitude(param.getLocation().getLatitude());
+            event.getLocation().setLongitude(param.getLocation().getLongitude());
         }
 
         if (param.hasPaid()) {

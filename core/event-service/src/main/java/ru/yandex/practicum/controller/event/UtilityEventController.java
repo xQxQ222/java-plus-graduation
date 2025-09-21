@@ -21,7 +21,7 @@ public class UtilityEventController {
     @GetMapping("/{eventId}")
     public ResponseEntity<EventFullDto> getEventByIdWithoutHit(@PathVariable Long eventId) {
         log.info("Пришел GET запрос на /utility/events/{}", eventId);
-        EventFullDto event = eventService.getEventById(eventId);
+        EventFullDto event = eventService.getEventByIdAnyState(eventId);
         log.info("Отправлен ответ на запрос GET /utility/events/{} c телом: {}", eventId, event);
         return ResponseEntity.ok(event);
     }
