@@ -8,11 +8,11 @@
 * ## Stats-server (Работа по сбору статистики обращений пользователей)
 
 Таблица использованиями сервисов Feign клиентов:
-||Comment Feign|Event Feign|Request Feign|User Feign|Stats Feign|
-|Comment-service||+|-|+|-|
-|Event-service|-||+|+|+|
-|Request-service|-|+||+|-|
-|User-service|-|-|-||-|
+| |Comment Feign|Event Feign|Request Feign|User Feign|Stats Feign|
+|Comment-service| |+|-|+|-|
+|Event-service|-| |+|+|+|
+|Request-service|-|+| |+|-|
+|User-service|-|-|-| |-|
 
 Ссылки на спецификацию:
 * ## [Main-service]<https://github.com/xQxQ222/java-plus-graduation/blob/main/ewm-main-service-spec.json>
