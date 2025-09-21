@@ -16,6 +16,6 @@
 |User-service|-|-|-| |-|
 
 Ссылки на спецификацию:
-* ## [Main-service]<https://github.com/xQxQ222/java-plus-graduation/blob/main/ewm-main-service-spec.json>
-* ## [Stats-server]<https://github.com/xQxQ222/java-plus-graduation/blob/main/ewm-stats-service-spec.json>
+* ## [Main-service](https://github.com/xQxQ222/java-plus-graduation/blob/main/ewm-main-service-spec.json)
+* ## [Stats-server](https://github.com/xQxQ222/java-plus-graduation/blob/main/ewm-stats-service-spec.json)
 
