@@ -11,10 +11,8 @@ import ru.yandex.practicum.dto.request.ConfirmedRequests;
 import ru.yandex.practicum.dto.user.UserDto;
 import ru.yandex.practicum.dto.user.UserShortDto;
 import ru.yandex.practicum.enums.request.RequestStatus;
-import ru.practicum.stats.dto.ViewStatsDto;
 import ru.yandex.practicum.feign.client.CommentFeignClient;
 import ru.yandex.practicum.feign.client.RequestFeignClient;
-import ru.yandex.practicum.feign.client.StatsFeignClient;
 import ru.yandex.practicum.feign.client.UserFeignClient;
 import ru.yandex.practicum.mapper.event.MapperEvent;
 import ru.yandex.practicum.model.event.Event;
@@ -27,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static ru.yandex.practicum.utility.Constants.DEFAULT_COMMENTS;
 import static ru.yandex.practicum.utility.Constants.MIN_START_DATE;
 
 @Component
@@ -38,7 +35,6 @@ public class ResponseEventBuilder {
     private final RequestFeignClient requestFeignClient;
     private final CommentFeignClient commentFeignClient;
     private final UserFeignClient userFeignClient;
-    private final StatsFeignClient statsClient;
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
         T dto;
@@ -60,7 +56,6 @@ public class ResponseEventBuilder {
         LocalDateTime created = event.getCreatedOn();
 
         dto.setConfirmedRequests(getOneEventConfirmedRequests(eventId));
-        dto.setViews(getOneEventViews(created, eventId));
         dto.setComments(getOneEventComments(eventId));
         return dto;
     }
@@ -85,11 +80,6 @@ public class ResponseEventBuilder {
                 dtoById.get(req.eventId()).setConfirmedRequests(req.countRequests()));
 
 
-        getManyEventsViews(dtoById.keySet()).forEach(stats -> {
-            Long id = Long.parseLong(stats.getUri().replace("/events/", ""));
-            dtoById.get(id).setViews(stats.getHits());
-        });
-
         getManyEventsComments(dtoById.keySet()).forEach(comment -> {
             T t = dtoById.get(comment);
 
@@ -107,10 +97,6 @@ public class ResponseEventBuilder {
         return requestFeignClient.getRequestsCountByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
     }
 
-    private long getOneEventViews(LocalDateTime created, long eventId) {
-        List<ViewStatsDto> viewStats = statsClient.getStats(created.minusMinutes(1), LocalDateTime.now().plusMinutes(1), List.of("/events/" + eventId), true).getBody();
-        return viewStats == null || viewStats.isEmpty() ? 0 : viewStats.getFirst().getHits();
-    }
 
     private List<GetCommentDto> getOneEventComments(long eventId) {
         List<GetCommentDto> comments = commentFeignClient.getCommentsByEventId(eventId);
@@ -122,13 +108,6 @@ public class ResponseEventBuilder {
         return requests == null ? new ArrayList<>() : requests;
     }
 
-    private List<ViewStatsDto> getManyEventsViews(Collection<Long> eventIds) {
-        List<String> uris = eventIds.stream()
-                .map(id -> "/events/" + id)
-                .toList();
-
-        return statsClient.getStats(MIN_START_DATE, LocalDateTime.now().plusMinutes(1), uris, true).getBody();
-    }
 
     private List<GetCommentDto> getManyEventsComments(Set<Long> eventsIds) {
         return commentFeignClient.getLastCommentsForEvents(eventsIds);

@@ -21,4 +21,6 @@ public interface RequestService {
     List<ConfirmedRequests> getConfirmedRequestsByEventId(Collection<Long> eventIds);
 
     ParticipationRequestDto changeRequestStatus(Long requestId, RequestStatus status);
+
+    ParticipationRequestDto getUserEventRequest(Long userId, Long eventId);
 }

@@ -9,6 +9,7 @@ import ru.yandex.practicum.model.Request;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
 
@@ -19,6 +20,8 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByEventId(Long eventId);
 
     int countByEventIdAndStatus(Long eventId, RequestStatus requestStatus);
+
+    Optional<Request> findByRequesterIdAndEventId(Long requesterId, Long eventId);
 
     @Query("""
             SELECT new ru.yandex.practicum.dto.request.ConfirmedRequests(r.eventId, CAST(COUNT(r.requesterId) AS INTEGER))

@@ -34,4 +34,9 @@ public class RequestFeignFallback implements RequestApi {
     public ParticipationRequestDto updateRequestStatus(Long requestId, RequestStatus status) {
         throw new ServiceUnavailableException(SERVICE_NAME);
     }
+
+    @Override
+    public ParticipationRequestDto getUserEventRequest(Long userId, Long eventId) {
+        throw new ServiceUnavailableException(SERVICE_NAME);
+    }
 }

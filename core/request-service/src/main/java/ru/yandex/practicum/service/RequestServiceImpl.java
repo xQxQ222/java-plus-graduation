@@ -123,6 +123,11 @@ public class RequestServiceImpl implements RequestService {
         return mapperRequest.toParticipationRequestDto(requestRepository.save(request));
     }
 
+    @Override
+    public ParticipationRequestDto getUserEventRequest(Long userId, Long eventId) {
+        return null;
+    }
+
     private boolean isPreModerationOn(boolean moderationStatus, int limit) {
         return moderationStatus && limit != 0;
     }

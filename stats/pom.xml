@@ -12,14 +12,12 @@
     <artifactId>stats</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>stats-client</module>
-        <module>stats-dto</module>
-        <module>stats-server</module>
         <module>serialization</module>
         <module>kafka-client</module>
         <module>collector</module>
         <module>aggregator</module>
         <module>analyzer</module>
+        <module>stats-client</module>
     </modules>
 
     <properties>

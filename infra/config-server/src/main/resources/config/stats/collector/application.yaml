@@ -2,7 +2,10 @@ grpc:
   server:
     port: 0
 
+server:
+  port: 0
+
 kafka:
   topic:
     stats:
-      user-actions: stats.user-actions.v1
+      actions: stats.user-actions.v1

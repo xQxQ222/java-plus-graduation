@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.client.CollectorGrpcClient;
 import ru.yandex.practicum.dto.user.UserDto;
 import ru.yandex.practicum.feign.client.RequestFeignClient;
 import ru.yandex.practicum.feign.client.UserFeignClient;
@@ -63,6 +64,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final ResponseEventBuilder responseEventBuilder;
+    private final CollectorGrpcClient collectorClient;
 
     @Override
     public List<EventFullDto> getEventsByAdmin(GetEventAdminParam param) {
@@ -277,10 +279,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEventById(Long eventId) {
+    public EventFullDto getEventById(Long userId, Long eventId) {
         Event eventDomain = eventRepository.findByIdAndState(eventId, PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(Constants.EVENT_NOT_FOUND));
-
+        collectorClient.handleUserEventView(userId, eventId);
         return responseEventBuilder.buildOneEventResponseDto(eventDomain, EventFullDto.class);
     }
 
@@ -289,6 +291,18 @@ public class EventServiceImpl implements EventService {
         Event eventDomain = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND));
         return responseEventBuilder.buildOneEventResponseDto(eventDomain, EventFullDto.class);
+    }
+
+    @Override
+    public void putLikeToEvent(Long userId, Long eventId) {
+        Event event = eventRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND));
+        UserDto user = userFeignClient.getUserById(userId);
+        ParticipationRequestDto userRequest = requestFeignClient.getUserEventRequest(userId, eventId);
+        if(userRequest.getStatus() != RequestStatus.CONFIRMED){
+            throw new BadRequestException("Пользователь должен посетить мероприятие, чтобы поставить ему лайк");
+        }
+        collectorClient.handleUserEventLike(userId, eventId);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.kafka.storage.name;
+package ru.yandex.practicum.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
-@ConfigurationProperties(prefix = "kafka.topic.stats")
-public class TopicNames {
-    private String similarity;
-    private String actions;
+@ConfigurationProperties(prefix = "action.weight")
+public class ActionWeightTable {
+    private double view;
+    private double register;
+    private double like;
 }
