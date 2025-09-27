@@ -17,9 +17,9 @@ public class UserActionController extends UserActionControllerGrpc.UserActionCon
     private final UserActionService userActionService;
 
     @Override
-    public void collectUserAction(UserActionProto request, StreamObserver<Empty> responseObserver) {
+    public void collectUserAction(UserActionProto userActionProto, StreamObserver<Empty> responseObserver) {
         try {
-            userActionService.handleUserAction(request);
+            userActionService.handleUserAction(userActionProto);
             responseObserver.onNext(Empty.getDefaultInstance());
             responseObserver.onCompleted();
         } catch (Exception e) {
