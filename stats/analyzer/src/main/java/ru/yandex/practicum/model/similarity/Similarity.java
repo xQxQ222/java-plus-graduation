@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 import java.time.Instant;
 
 @Entity
-@Table(name = "similarity")
+@Table(name = "similarities")
 @Getter
 @Setter
 @Builder
