@@ -300,7 +300,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void putLikeToEvent(Long userId, Long eventId) {
-        Event event = eventRepository.findById(userId)
+        Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND));
         UserDto user = userFeignClient.getUserById(userId);
         ParticipationRequestDto userRequest = requestFeignClient.getUserEventRequest(userId, eventId);
