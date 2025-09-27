@@ -1,4 +1,4 @@
-package ru.yandex.practicum.service;
+package ru.yandex.practicum.service.analyzer;
 
 import ru.yandex.practicum.grpc.stats.user.prediction.InteractionsCountRequestProto;
 import ru.yandex.practicum.grpc.stats.user.prediction.RecommendedEventProto;

@@ -11,6 +11,7 @@ action:
 kafka:
   topic:
     stats:
+      actions: stats.user-actions.v1
       similarity: stats.events-similarity.v1
 
 spring:

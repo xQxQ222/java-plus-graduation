@@ -11,7 +11,7 @@ import ru.yandex.practicum.grpc.stats.user.prediction.RecommendedEventProto;
 import ru.yandex.practicum.grpc.stats.user.prediction.SimilarEventsRequestProto;
 import ru.yandex.practicum.grpc.stats.user.prediction.UserPredictionsRequestProto;
 import ru.yandex.practicum.grpc.stats.user.prediction.controller.RecommendationsControllerGrpc;
-import ru.yandex.practicum.service.AnalyzerService;
+import ru.yandex.practicum.service.analyzer.AnalyzerService;
 
 @RequiredArgsConstructor
 @GrpcService

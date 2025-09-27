@@ -3,6 +3,7 @@ package ru.yandex.practicum.util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.client.AnalyzerGrpcClient;
 import ru.yandex.practicum.dto.comment.GetCommentDto;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
@@ -14,18 +15,12 @@ import ru.yandex.practicum.enums.request.RequestStatus;
 import ru.yandex.practicum.feign.client.CommentFeignClient;
 import ru.yandex.practicum.feign.client.RequestFeignClient;
 import ru.yandex.practicum.feign.client.UserFeignClient;
+import ru.yandex.practicum.grpc.stats.user.prediction.RecommendedEventProto;
 import ru.yandex.practicum.mapper.event.MapperEvent;
 import ru.yandex.practicum.model.event.Event;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static ru.yandex.practicum.utility.Constants.MIN_START_DATE;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -35,6 +30,7 @@ public class ResponseEventBuilder {
     private final RequestFeignClient requestFeignClient;
     private final CommentFeignClient commentFeignClient;
     private final UserFeignClient userFeignClient;
+    private final AnalyzerGrpcClient analyzerGrpcClient;
 
     public <T extends ResponseEvent> T buildOneEventResponseDto(Event event, Class<T> type) {
         T dto;
@@ -45,10 +41,12 @@ public class ResponseEventBuilder {
         if (type == EventFullDto.class) {
             EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
             dtoTemp.setInitiator(initiator);
+            dtoTemp.setRating(getEventRating(event.getId()));
             dto = type.cast(dtoTemp);
         } else {
             EventShortDto dtoTemp = eventMapper.toEventShortDto(event);
             dtoTemp.setInitiator(initiator);
+            dtoTemp.setRating(getEventRating(event.getId()));
             dto = type.cast(dtoTemp);
         }
 
@@ -68,10 +66,12 @@ public class ResponseEventBuilder {
             if (type == EventFullDto.class) {
                 EventFullDto dtoTemp = eventMapper.toEventFullDto(event);
                 dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
+                dtoTemp.setRating(getEventRating(event.getId()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             } else {
                 EventShortDto dtoTemp = eventMapper.toEventShortDto(event);
                 dtoTemp.setInitiator(new UserShortDto(initiator.getId(), initiator.getName()));
+                dtoTemp.setRating(getEventRating(event.getId()));
                 dtoById.put(event.getId(), type.cast(dtoTemp));
             }
         }
@@ -111,5 +111,12 @@ public class ResponseEventBuilder {
 
     private List<GetCommentDto> getManyEventsComments(Set<Long> eventsIds) {
         return commentFeignClient.getLastCommentsForEvents(eventsIds);
+    }
+
+    private double getEventRating(long eventId) {
+        return analyzerGrpcClient.getInteractionsCount(List.of(eventId))
+                .mapToDouble(RecommendedEventProto::getScore)
+                .findFirst()
+                .orElse(0.00);
     }
 }

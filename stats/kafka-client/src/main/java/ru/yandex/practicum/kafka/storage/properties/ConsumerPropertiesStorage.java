@@ -17,12 +17,21 @@ public class ConsumerPropertiesStorage {
         return properties;
     }
 
-    public static Properties getAnalyzerConsumerProperties() {
+    public static Properties getActionProcessorConsumerProperties() {
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, UserActionAvroDeserializer.class);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "analyzer_action_processor_group");
+        return properties;
+    }
+
+    public static Properties getSimilarityProcessorConsumerProperties() {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, EventSimilarityAvroDeserializer.class);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "analyzer_consumer_group");
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "analyzer_similarity_processor_group");
         return properties;
     }
 }

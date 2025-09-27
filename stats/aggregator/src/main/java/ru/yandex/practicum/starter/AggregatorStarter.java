@@ -3,11 +3,11 @@ package ru.yandex.practicum.starter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
@@ -18,7 +18,6 @@ import ru.yandex.practicum.kafka.configuration.KafkaClient;
 import ru.yandex.practicum.kafka.storage.name.TopicNames;
 import ru.yandex.practicum.kafka.storage.properties.ConsumerPropertiesStorage;
 import ru.yandex.practicum.kafka.storage.properties.ProducerPropertiesStorage;
-import ru.yandex.practicum.utility.EventSimilarity;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -58,7 +57,7 @@ public class AggregatorStarter {
             }
         } catch (WakeupException ignored) {
         } catch (Exception e) {
-            log.error("Ошибка во время обработки событий от датчиков", e);
+            log.error("Ошибка во время обработки действий пользователя", e);
         } finally {
 
             try {
@@ -66,6 +65,7 @@ public class AggregatorStarter {
             } finally {
                 log.info("Закрываем consumer + producer");
                 kafkaClient.stopConsumer(CONSUMER_NAME);
+                kafkaClient.stopProducer(PRODUCER_NAME);
             }
         }
     }
