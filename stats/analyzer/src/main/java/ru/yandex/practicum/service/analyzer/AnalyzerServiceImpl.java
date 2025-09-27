@@ -2,6 +2,7 @@ package ru.yandex.practicum.service.analyzer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.enums.UserActionType;
 import ru.yandex.practicum.grpc.stats.user.prediction.InteractionsCountRequestProto;
@@ -32,7 +33,15 @@ public class AnalyzerServiceImpl implements AnalyzerService {
 
     @Override
     public List<RecommendedEventProto> getRecommendationsForUser(UserPredictionsRequestProto request) {
-        return List.of();
+        long userId = request.getUserId();
+        int maxResults = request.getMaxResults();
+
+        List<Long> eventsWithUserActions = actionRepository.findDistinctEventIdsByUserIdOrderByTimestampDesc(userId, PageRequest.of(0, maxResults));
+        List<Similarity> topSimilarities = similarityRepository.findTopByEventIdsIn(eventsWithUserActions, PageRequest.of(0, maxResults));
+
+        return topSimilarities.stream()
+                .map(s -> convertSimilarityToRecommendation(s, eventsWithUserActions))
+                .toList();
     }
 
     @Override
@@ -86,6 +95,17 @@ public class AnalyzerServiceImpl implements AnalyzerService {
 
     private RecommendedEventProto convertSimilarityToRecommendation(Similarity similarity, Long requestEventId) {
         long eventId = similarity.getId().getEventAId().equals(requestEventId)
+                ? similarity.getId().getEventBId()
+                : similarity.getId().getEventAId();
+
+        return RecommendedEventProto.newBuilder()
+                .setEventId(eventId)
+                .setScore(similarity.getRating())
+                .build();
+    }
+
+    private RecommendedEventProto convertSimilarityToRecommendation(Similarity similarity, List<Long> ids) {
+        long eventId = ids.contains(similarity.getId().getEventAId())
                 ? similarity.getId().getEventBId()
                 : similarity.getId().getEventAId();
 
