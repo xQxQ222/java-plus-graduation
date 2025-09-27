@@ -2,7 +2,6 @@ package ru.yandex.practicum.client;
 
 import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.grpc.stats.user.action.ActionTypeProto;
@@ -12,7 +11,7 @@ import ru.yandex.practicum.grpc.stats.user.action.controller.UserActionControlle
 import java.time.Instant;
 
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class CollectorGrpcClient {
 
     @GrpcClient("collector")
@@ -44,11 +43,6 @@ public class CollectorGrpcClient {
                 .setActionType(actionType)
                 .setTimestamp(timestamp)
                 .build();
-
-        try {
-            actionClient.collectUserAction(userActionProto);
-        } catch (Exception e) {
-            log.error("Ошибка при обработке действия пользователя: {}", e.getMessage());
-        }
+        actionClient.collectUserAction(userActionProto);
     }
 }

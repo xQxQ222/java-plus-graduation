@@ -68,7 +68,7 @@ public class KafkaClientConfiguration {
             }
 
             @Override
-            public void manageOffset(ConsumerRecord<String, ? extends SpecificRecordBase> record, int count, Consumer<String, ? extends SpecificRecordBase> consumer, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
+            public void manageOffset(ConsumerRecord<Long, ? extends SpecificRecordBase> record, int count, Consumer<Long, ? extends SpecificRecordBase> consumer, Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
                 currentOffsets.put(
                         new TopicPartition(record.topic(), record.partition()),
                         new OffsetAndMetadata(record.offset() + 1)

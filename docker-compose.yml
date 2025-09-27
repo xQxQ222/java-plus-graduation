@@ -1,14 +1,4 @@
 services:
-  stats-db:
-    image: postgres:16.1
-    container_name: stats-db
-    ports:
-      - "6432:5432"
-    environment:
-      - POSTGRES_DB=stats
-      - POSTGRES_USER=stats
-      - POSTGRES_PASSWORD=stats
-
   request-db:
     image: postgres:16.1
     container_name: request-service-db
@@ -46,6 +36,16 @@ services:
       - "7435:5432"
     environment:
       - POSTGRES_DB=comment_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  analyzer-db:
+    image: postgres:16.1
+    container_name: analyzer-db
+    ports:
+      - "7436:5432"
+    environment:
+      - POSTGRES_DB=analyzer_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
 

@@ -1,0 +1,26 @@
+grpc:
+  server:
+    port: 0
+
+action:
+  weight:
+    view: 0.4
+    register: 0.8
+    like: 1.0
+
+kafka:
+  topic:
+    stats:
+      similarity: stats.events-similarity.v1
+
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:7436/analyzer_db
+    username: postgres
+    password: postgres
+  sql:
+    init:
+      mode: always
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.config;
+package ru.yandex.practicum.kafka.storage.util;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @Component
 @ConfigurationProperties(prefix = "action.weight")
-public class ActionWeightTable {
+public class ActionWeightStorage {
     private double view;
     private double register;
     private double like;

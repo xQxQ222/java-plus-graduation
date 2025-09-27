@@ -20,7 +20,7 @@ public interface KafkaClient {
 
     void stopConsumer(String consumerName);
 
-    void manageOffset(ConsumerRecord<String, ? extends SpecificRecordBase> record, int count,
-                      Consumer<String, ? extends SpecificRecordBase> consumer,
+    void manageOffset(ConsumerRecord<Long, ? extends SpecificRecordBase> record, int count,
+                      Consumer<Long, ? extends SpecificRecordBase> consumer,
                       Map<TopicPartition, OffsetAndMetadata> currentOffsets);
 }
