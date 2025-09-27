@@ -39,4 +39,6 @@ public interface EventService {
     EventFullDto getEventByIdAnyState(Long eventId);
 
     void putLikeToEvent(Long userId, Long eventId);
+
+    List<EventFullDto> getRecommendations(Long userId);
 }

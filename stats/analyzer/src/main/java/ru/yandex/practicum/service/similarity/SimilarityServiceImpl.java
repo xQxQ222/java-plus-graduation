@@ -22,7 +22,7 @@ public class SimilarityServiceImpl implements SimilarityService {
         long eventAId = eventSimilarityAvro.getEventA();
         long eventBId = eventSimilarityAvro.getEventB();
 
-        Optional<Similarity> similarityFromDb = similarityRepository.findByEventAIdAndEventBId(eventAId, eventBId);
+        Optional<Similarity> similarityFromDb = similarityRepository.findByIdEventAIdAndIdEventBId(eventAId, eventBId);
 
         if (similarityFromDb.isEmpty()) {
             SimilarityKey similarityKey = new SimilarityKey(eventAId, eventBId);

@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.client.CollectorGrpcClient;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.enums.event.EventSortType;
@@ -90,5 +89,13 @@ public class PublicEventController {
         log.info("Пришел PUT запрос на /events/{}/like", eventId);
         log.info("Отправлен ответ на запрос PUT /events/{}/like", eventId);
         eventService.putLikeToEvent(userId, eventId);
+    }
+
+    @GetMapping("/recommendations")
+    public List<EventFullDto> getRecommendations(@RequestHeader("X-EWM-USER-ID") long userId) {
+        log.info("Пришел GET запрос на /events/recommendations");
+        List<EventFullDto> recommendations = eventService.getRecommendations(userId);
+        log.info("Отправлен ответ на запрос GET /events/recommendations");
+        return recommendations;
     }
 }
