@@ -9,7 +9,6 @@ import ru.yandex.practicum.model.action.Action;
 import ru.yandex.practicum.repository.UserActionRepository;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,16 +40,6 @@ public class ActionServiceImpl implements ActionService {
             action.setTimestamp(timestamp);
             actionRepository.save(action);
         }
-    }
-
-    @Override
-    public List<Action> getUserActions(Long userId) {
-        return actionRepository.findByUserId(userId);
-    }
-
-    @Override
-    public List<Action> getActionsToEvent(Long eventId) {
-        return actionRepository.findByEventId(eventId);
     }
 
 
