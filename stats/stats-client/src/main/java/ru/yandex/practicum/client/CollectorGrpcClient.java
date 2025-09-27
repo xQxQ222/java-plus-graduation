@@ -1,7 +1,6 @@
 package ru.yandex.practicum.client;
 
 import com.google.protobuf.Timestamp;
-import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.grpc.stats.user.action.ActionTypeProto;
@@ -11,11 +10,12 @@ import ru.yandex.practicum.grpc.stats.user.action.controller.UserActionControlle
 import java.time.Instant;
 
 @Component
-@RequiredArgsConstructor
 public class CollectorGrpcClient {
+    private final UserActionControllerGrpc.UserActionControllerBlockingStub actionClient;
 
-    @GrpcClient("collector")
-    private UserActionControllerGrpc.UserActionControllerBlockingStub actionClient;
+    public CollectorGrpcClient(@GrpcClient("collector") UserActionControllerGrpc.UserActionControllerBlockingStub client) {
+        actionClient = client;
+    }
 
     public void handleUserEventView(Long userId, Long eventId) {
         handleUserAction(userId, eventId, ActionTypeProto.ACTION_VIEW);
