@@ -3,6 +3,7 @@ package ru.yandex.practicum.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.client.CollectorGrpcClient;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.request.ConfirmedRequests;
 import ru.yandex.practicum.dto.user.UserDto;
@@ -30,6 +31,7 @@ public class RequestServiceImpl implements RequestService {
     private final EventFeignClient eventFeignClient;
     private final UserFeignClient userFeignClient;
     private final MapperRequest mapperRequest;
+    private final CollectorGrpcClient collectorClient;
 
     @Override
     public List<ParticipationRequestDto> getParticipationRequests(Long userId) {
@@ -73,6 +75,8 @@ public class RequestServiceImpl implements RequestService {
         );
 
         request = requestRepository.save(request);
+
+        collectorClient.handleUserEventRegister(userId, eventId);
 
         return mapperRequest.toParticipationRequestDto(request);
     }

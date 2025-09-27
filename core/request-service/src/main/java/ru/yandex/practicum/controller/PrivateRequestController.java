@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.client.CollectorGrpcClient;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.service.RequestService;
 
@@ -26,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PrivateRequestController {
     private final RequestService requestService;
-    private final CollectorGrpcClient collectorClient;
+
 
     @GetMapping
     public List<ParticipationRequestDto> getParticipationRequests(@Min(1) @PathVariable Long userId) {
@@ -40,9 +39,6 @@ public class PrivateRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createParticipationRequest(@Min(1) @PathVariable Long userId,
                                                               @Min(1) @RequestParam Long eventId) {
-        log.info("Пользователь с id {} зарегистрировался на мероприятие с id {}", userId, eventId);
-        collectorClient.handleUserEventRegister(userId, eventId);
-
         log.info("Получен POST /users/{}/requests , eventId = {}", userId, eventId);
         ParticipationRequestDto participationRequest = requestService.createParticipationRequest(userId, eventId);
         log.info("Успешно создана заявка пользователем = {} на участие в мероприятити = {}", userId, eventId);
