@@ -21,8 +21,7 @@ public class EventSimilarityHandlerImpl implements EventSimilarityHandler {
     public List<EventSimilarityAvro> handleAction(SpecificRecordBase userAction) {
         try {
             UserActionAvro userActionAvro = (UserActionAvro) userAction;
-            similarityStorage.updateSimilarity(userActionAvro);
-            return similarityStorage.getSimilarEvents(userActionAvro.getEventId(), userActionAvro.getUserId());
+            return similarityStorage.updateSimilarity(userActionAvro);
         } catch (Exception e) {
             log.error("Ошибка приведения информации из топика к типу UserActionAvro");
             throw new IllegalArgumentException("Ошибка приведения информации из топика к типу UserActionAvro");

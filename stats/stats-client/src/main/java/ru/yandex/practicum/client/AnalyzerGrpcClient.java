@@ -18,11 +18,8 @@ import java.util.stream.Stream;
 @Component
 @Slf4j
 public class AnalyzerGrpcClient {
-    private final RecommendationsControllerGrpc.RecommendationsControllerBlockingStub recommendationClient;
-
-    public AnalyzerGrpcClient(@GrpcClient("analyzer") RecommendationsControllerGrpc.RecommendationsControllerBlockingStub client) {
-        recommendationClient = client;
-    }
+    @GrpcClient("analyzer")
+    private RecommendationsControllerGrpc.RecommendationsControllerBlockingStub recommendationClient;
 
     public Stream<RecommendedEventProto> getRecommendationsForUser(long userId, int maxResults) {
         UserPredictionsRequestProto requestProto = UserPredictionsRequestProto.newBuilder()

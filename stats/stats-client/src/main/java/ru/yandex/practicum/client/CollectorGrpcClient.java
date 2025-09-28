@@ -11,11 +11,9 @@ import java.time.Instant;
 
 @Component
 public class CollectorGrpcClient {
-    private final UserActionControllerGrpc.UserActionControllerBlockingStub actionClient;
 
-    public CollectorGrpcClient(@GrpcClient("collector") UserActionControllerGrpc.UserActionControllerBlockingStub client) {
-        actionClient = client;
-    }
+    @GrpcClient("collector")
+    private UserActionControllerGrpc.UserActionControllerBlockingStub actionClient;
 
     public void handleUserEventView(Long userId, Long eventId) {
         handleUserAction(userId, eventId, ActionTypeProto.ACTION_VIEW);
