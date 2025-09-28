@@ -7,11 +7,8 @@ import ru.yandex.practicum.model.similarity.Similarity;
 import ru.yandex.practicum.model.similarity.SimilarityKey;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface EventSimilarityRepository extends JpaRepository<Similarity, SimilarityKey> {
-    Optional<Similarity> findByIdEventAIdAndIdEventBId(Long eventAId, Long eventBId);
-
     @Query("""
             select s from Similarity s where s.id.eventAId = :eventId or s.id.eventBId = :eventId
             """)

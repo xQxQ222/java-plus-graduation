@@ -12,10 +12,6 @@ import java.util.Optional;
 public interface UserActionRepository extends JpaRepository<Action, Long> {
     Optional<Action> findByUserIdAndEventIdAndActionType(Long userId, Long eventId, UserActionType actionType);
 
-    List<Action> findByUserId(Long userId);
-
-    List<Action> findByEventId(Long eventId);
-
     List<Action> findByEventIdIn(List<Long> eventIds);
 
     List<Long> findDistinctEventIdByUserIdOrderByTimestampDesc(Long userId);

@@ -96,19 +96,15 @@ public class SimilarityStorageImpl implements SimilarityStorage {
         return newMinSum;
     }
 
-    private double calculateSimilarity(Long eventId, Long otherEventId, double sumMinPairWeight) {
-        if (sumMinPairWeight == 0) {
+    private double calculateSimilarity(Long eventAId, Long eventBId, double minSum) {
+        if (minSum == 0) {
             return 0;
         }
 
-        double sumWeightEvent = eventWeightSums.getOrDefault(eventId, 0.0);
-        double sumWeightOtherEvent = eventWeightSums.getOrDefault(otherEventId, 0.0);
+        double sumWeightEventA = eventWeightSums.getOrDefault(eventAId, 0.0);
+        double sumWeightEventB = eventWeightSums.getOrDefault(eventBId, 0.0);
 
-        if (sumWeightEvent == 0 || sumWeightOtherEvent == 0) {
-            return 0;
-        }
-
-        return sumMinPairWeight / (Math.sqrt(sumWeightEvent) * Math.sqrt(sumWeightOtherEvent));
+        return (sumWeightEventA == 0 || sumWeightEventB == 0) ? 0 : (minSum / (Math.sqrt(sumWeightEventA) * Math.sqrt(sumWeightEventB)));
     }
 
     private EventSimilarityAvro createEventSimilarityAvro(long eventA, long eventB, double similarity, Instant timestamp) {
