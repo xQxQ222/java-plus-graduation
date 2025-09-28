@@ -26,6 +26,7 @@ import java.util.List;
 public class PrivateRequestController {
     private final RequestService requestService;
 
+
     @GetMapping
     public List<ParticipationRequestDto> getParticipationRequests(@Min(1) @PathVariable Long userId) {
         log.info("Получен GET /users/{}/requests", userId);

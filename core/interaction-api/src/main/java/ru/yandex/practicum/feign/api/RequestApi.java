@@ -20,4 +20,7 @@ public interface RequestApi {
 
     @PutMapping("/{requestId}/confirm")
     ParticipationRequestDto updateRequestStatus(@PathVariable Long requestId, @RequestBody RequestStatus status);
+
+    @GetMapping("/users/{userId}/event/{eventId}")
+    ParticipationRequestDto getUserEventRequest(@PathVariable(name = "userId") Long userId, @PathVariable(name = "eventId") Long eventId);
 }

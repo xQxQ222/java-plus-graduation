@@ -51,4 +51,12 @@ public class UtilityRequestController implements RequestApi {
         log.info("Статус заявки с id {} изменен на {}", requestId, request.getStatus());
         return request;
     }
+
+    @GetMapping("/users/{userId}/event/{eventId}")
+    public ParticipationRequestDto getUserEventRequest(@PathVariable(name = "userId") Long userId, @PathVariable(name = "eventId") Long eventId) {
+        log.info("Пришел GET запрос на /utility/requests/users/{}/event/{}", userId, eventId);
+        ParticipationRequestDto request = requestService.getUserEventRequest(userId, eventId);
+        log.info("Отправлен ответ на запрос GET /utility/requests/users/{}/event/{} с телом: {}", userId, eventId, request);
+        return request;
+    }
 }

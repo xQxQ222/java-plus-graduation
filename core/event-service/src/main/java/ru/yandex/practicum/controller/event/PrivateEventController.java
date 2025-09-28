@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.client.CollectorGrpcClient;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.dto.event.*;
 import ru.yandex.practicum.service.event.EventService;

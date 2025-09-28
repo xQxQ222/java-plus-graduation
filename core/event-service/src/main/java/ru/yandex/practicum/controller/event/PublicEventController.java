@@ -11,16 +11,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.enums.event.EventSortType;
 import ru.yandex.practicum.exception.BadRequestException;
-import ru.practicum.stats.dto.EndpointHitDto;
-import ru.yandex.practicum.feign.client.StatsFeignClient;
 import ru.yandex.practicum.service.event.EventService;
 import ru.yandex.practicum.service.event.param.GetEventUserParam;
 
@@ -37,7 +32,7 @@ import static ru.yandex.practicum.utility.Constants.DATE_PATTERN;
 public class PublicEventController {
 
     private final EventService eventService;
-    private final StatsFeignClient statsClient;
+
 
     @GetMapping
     public ResponseEntity<List<EventShortDto>> getEventsByFilters(@RequestParam(name = "text", required = false) String text,
@@ -54,7 +49,6 @@ public class PublicEventController {
             throw new BadRequestException("rangeStart > rangeEnd");
         }
         log.info("Пришел GET запрос /events на Public Event Controller");
-        doHit(request);
 
         Pageable page;
         if (sort != null) {
@@ -83,20 +77,25 @@ public class PublicEventController {
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> getEventById(@PathVariable Long eventId, HttpServletRequest request) {
+    public ResponseEntity<EventFullDto> getEventById(@RequestHeader("X-EWM-USER-ID") long userId, @PathVariable Long eventId, HttpServletRequest request) {
         log.info("Пришел GET запрос на /events/{} Public Event Controller", eventId);
-        doHit(request);
-        EventFullDto event = eventService.getEventById(eventId);
+        EventFullDto event = eventService.getEventById(userId, eventId);
         log.info("Отправлен ответ на GET /events/{} c телом: {}", eventId, event);
         return ResponseEntity.ok(event);
     }
 
-    private void doHit(HttpServletRequest request) {
-        EndpointHitDto hitDto = new EndpointHitDto();
-        hitDto.setApp("ewm-main-service");
-        hitDto.setIp(request.getRemoteAddr());
-        hitDto.setUri(request.getRequestURI());
-        hitDto.setCreated(LocalDateTime.now());
-        statsClient.hitStat(hitDto);
+    @PutMapping("/{eventId}/like")
+    public void putLikeToEvent(@RequestHeader("X-EWM-USER-ID") long userId, @PathVariable long eventId) {
+        log.info("Пришел PUT запрос на /events/{}/like", eventId);
+        log.info("Отправлен ответ на запрос PUT /events/{}/like", eventId);
+        eventService.putLikeToEvent(userId, eventId);
+    }
+
+    @GetMapping("/recommendations")
+    public List<EventFullDto> getRecommendations(@RequestHeader("X-EWM-USER-ID") long userId) {
+        log.info("Пришел GET запрос на /events/recommendations");
+        List<EventFullDto> recommendations = eventService.getRecommendations(userId);
+        log.info("Отправлен ответ на запрос GET /events/recommendations");
+        return recommendations;
     }
 }

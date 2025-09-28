@@ -7,9 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.client.AnalyzerGrpcClient;
+import ru.yandex.practicum.client.CollectorGrpcClient;
 import ru.yandex.practicum.dto.user.UserDto;
 import ru.yandex.practicum.feign.client.RequestFeignClient;
 import ru.yandex.practicum.feign.client.UserFeignClient;
+import ru.yandex.practicum.grpc.stats.user.prediction.RecommendedEventProto;
 import ru.yandex.practicum.mapper.event.MapperEvent;
 import ru.yandex.practicum.model.category.Category;
 import ru.yandex.practicum.model.event.Event;
@@ -39,8 +42,7 @@ import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.enums.request.RequestStatus;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static ru.yandex.practicum.utility.Constants.CATEGORY_NOT_FOUND;
 import static ru.yandex.practicum.utility.Constants.EVENT_NOT_FOUND;
@@ -56,6 +58,9 @@ import static ru.yandex.practicum.enums.event.EventState.REJECTED;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
+
+    private static final int MAX_RECOMMENDATIONS_COUNT = 10;
+
     private final EventRepository eventRepository;
     private final MapperEvent eventMapper;
     private final RequestFeignClient requestFeignClient;
@@ -63,6 +68,8 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final ResponseEventBuilder responseEventBuilder;
+    private final CollectorGrpcClient collectorClient;
+    private final AnalyzerGrpcClient analyzerGrpcClient;
 
     @Override
     public List<EventFullDto> getEventsByAdmin(GetEventAdminParam param) {
@@ -277,10 +284,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto getEventById(Long eventId) {
+    public EventFullDto getEventById(Long userId, Long eventId) {
         Event eventDomain = eventRepository.findByIdAndState(eventId, PUBLISHED)
                 .orElseThrow(() -> new NotFoundException(Constants.EVENT_NOT_FOUND));
-
+        collectorClient.handleUserEventView(userId, eventId);
         return responseEventBuilder.buildOneEventResponseDto(eventDomain, EventFullDto.class);
     }
 
@@ -289,6 +296,28 @@ public class EventServiceImpl implements EventService {
         Event eventDomain = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND));
         return responseEventBuilder.buildOneEventResponseDto(eventDomain, EventFullDto.class);
+    }
+
+    @Override
+    public void putLikeToEvent(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND));
+        UserDto user = userFeignClient.getUserById(userId);
+        ParticipationRequestDto userRequest = requestFeignClient.getUserEventRequest(userId, eventId);
+        if (userRequest.getStatus() != RequestStatus.CONFIRMED) {
+            throw new BadRequestException("Пользователь должен посетить мероприятие, чтобы поставить ему лайк");
+        }
+        collectorClient.handleUserEventLike(userId, eventId);
+    }
+
+    @Override
+    public List<EventFullDto> getRecommendations(Long userId) {
+        List<Event> events = analyzerGrpcClient.getRecommendationsForUser(userId, MAX_RECOMMENDATIONS_COUNT)
+                .map(proto -> proto.getEventId())
+                .map(eventRepository::findById)
+                .map(Optional::get)
+                .toList();
+        return responseEventBuilder.buildManyEventResponseDto(events, EventFullDto.class);
     }
 
     @Override
@@ -366,5 +395,12 @@ public class EventServiceImpl implements EventService {
 
     private boolean isPreModerationOff(boolean moderationStatus, int limit) {
         return !moderationStatus || limit == 0;
+    }
+
+    private double getEventRating(long eventId) {
+        return analyzerGrpcClient.getInteractionsCount(List.of(eventId))
+                .mapToDouble(RecommendedEventProto::getScore)
+                .findFirst()
+                .orElse(0.00);
     }
 }
