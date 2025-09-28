@@ -24,7 +24,7 @@ public class AnalyzerController extends RecommendationsControllerGrpc.Recommenda
     public void getRecommendationsForUser(UserPredictionsRequestProto request, StreamObserver<RecommendedEventProto> responseObserver) {
         log.info("Пришел запрос на GRPC контроллер - getRecommendationsForUser");
         try {
-            analyzerService.getRecommendationsForUser(request);
+            analyzerService.getRecommendationsForUser(request).forEach(responseObserver::onNext);
             log.info("Получены рекомендации для пользователя по запросу: {}", request);
             responseObserver.onCompleted();
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class AnalyzerController extends RecommendationsControllerGrpc.Recommenda
     public void getSimilarEvents(SimilarEventsRequestProto request, StreamObserver<RecommendedEventProto> responseObserver) {
         log.info("Пришел запрос на GRPC контроллер - getSimilarEvents");
         try {
-            analyzerService.getSimilarEvents(request);
+            analyzerService.getSimilarEvents(request).forEach(responseObserver::onNext);
             log.info("Получены похожие мероприятия по запросу: {}", request);
             responseObserver.onCompleted();
         } catch (Exception e) {
@@ -56,7 +56,7 @@ public class AnalyzerController extends RecommendationsControllerGrpc.Recommenda
     public void getInteractionsCount(InteractionsCountRequestProto request, StreamObserver<RecommendedEventProto> responseObserver) {
         log.info("Пришел запрос на GRPC контроллер - getInteractionsCount");
         try {
-            analyzerService.getInteractionsCount(request);
+            analyzerService.getInteractionsCount(request).forEach(responseObserver::onNext);
             log.info("Получено количество итераций по запросу: {}", request);
             responseObserver.onCompleted();
         } catch (Exception e) {

@@ -17,7 +17,7 @@ public class SimilarityStorageImpl implements SimilarityStorage {
     private final Map<Long, Map<Long, Double>> minWeightsSums = new HashMap<>();
     private final Map<Long, Double> eventWeightSums = new HashMap<>();
     private final ActionWeightStorage weightTable;
-    
+
     @Override
     public List<EventSimilarityAvro> updateSimilarity(UserActionAvro userAction) {
         long userId = userAction.getUserId();

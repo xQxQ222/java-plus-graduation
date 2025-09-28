@@ -22,21 +22,11 @@ public class SimilarityServiceImpl implements SimilarityService {
         long eventAId = eventSimilarityAvro.getEventA();
         long eventBId = eventSimilarityAvro.getEventB();
 
-        Optional<Similarity> similarityFromDb = similarityRepository.findByIdEventAIdAndIdEventBId(eventAId, eventBId);
-
-        if (similarityFromDb.isEmpty()) {
-            SimilarityKey similarityKey = new SimilarityKey(eventAId, eventBId);
-            Similarity similarityNew = Similarity.builder()
-                    .id(similarityKey)
-                    .rating(eventSimilarityAvro.getScore())
-                    .timestamp(eventSimilarityAvro.getTimestamp())
-                    .build();
-            similarityRepository.save(similarityNew);
-        } else {
-            Similarity similarity = similarityFromDb.get();
-            similarity.setRating(eventSimilarityAvro.getScore());
-            similarity.setTimestamp(eventSimilarityAvro.getTimestamp());
-            similarityRepository.save(similarity);
-        }
+        Similarity similarity = Similarity.builder()
+                .id(new SimilarityKey(eventAId, eventBId))
+                .timestamp(eventSimilarityAvro.getTimestamp())
+                .rating(eventSimilarityAvro.getScore())
+                .build();
+        similarityRepository.save(similarity);
     }
 }

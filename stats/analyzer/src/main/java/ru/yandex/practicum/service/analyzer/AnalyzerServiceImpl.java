@@ -15,10 +15,7 @@ import ru.yandex.practicum.model.similarity.Similarity;
 import ru.yandex.practicum.repository.EventSimilarityRepository;
 import ru.yandex.practicum.repository.UserActionRepository;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,18 +65,27 @@ public class AnalyzerServiceImpl implements AnalyzerService {
 
     @Override
     public List<RecommendedEventProto> getInteractionsCount(InteractionsCountRequestProto request) {
-        List<Action> actionsByEvent = actionRepository.findByEventIdIn(request.getEventIdList());
 
-        Map<Long, Double> maxWeightByEvent = actionsByEvent.stream()
-                .collect(Collectors.groupingBy(Action::getEventId, Collectors.collectingAndThen(
-                        Collectors.maxBy(Comparator.comparingDouble(a -> getUserActionWeight(a.getActionType()))),
-                        opt -> opt.map(a -> getUserActionWeight(a.getActionType())).orElse(0.0))));
+        List<Long> eventsId = request.getEventIdList();
+        List<Action> actionsByEvent = actionRepository.findByEventIdIn(eventsId);
 
+        Map<Map.Entry<Long, Long>, Double> maxScoreByEventAndUser = actionsByEvent.stream()
+                .collect(Collectors.groupingBy(
+                        action -> Map.entry(action.getEventId(), action.getUserId()),
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparingDouble(a -> getUserActionWeight(a.getActionType()))),
+                                opt -> opt.map(a -> getUserActionWeight(a.getActionType())).orElse(0.0))));
 
-        return maxWeightByEvent.entrySet().stream()
-                .map(e -> RecommendedEventProto.newBuilder()
-                        .setEventId(e.getKey())
-                        .setScore(e.getValue())
+        Map<Long, Double> eventsSum = maxScoreByEventAndUser.entrySet().stream()
+                .collect(Collectors.groupingBy(
+                        e -> e.getKey().getKey(),
+                        Collectors.summingDouble(Map.Entry::getValue)
+                ));
+
+        return eventsSum.entrySet().stream()
+                .map(es -> RecommendedEventProto.newBuilder()
+                        .setEventId(es.getKey())
+                        .setScore(es.getValue())
                         .build())
                 .toList();
     }

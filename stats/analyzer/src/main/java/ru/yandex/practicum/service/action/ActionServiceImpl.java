@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.stats.avro.ActionTypeAvro;
 import ru.practicum.ewm.stats.avro.UserActionAvro;
 import ru.yandex.practicum.enums.UserActionType;
+import ru.yandex.practicum.kafka.storage.util.ActionWeightStorage;
 import ru.yandex.practicum.model.action.Action;
 import ru.yandex.practicum.repository.UserActionRepository;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class ActionServiceImpl implements ActionService {
 
     private final UserActionRepository actionRepository;
+    private final ActionWeightStorage weightStorage;
 
     @Override
     public void registerUserAction(UserActionAvro userActionAvro) {
@@ -37,8 +39,12 @@ public class ActionServiceImpl implements ActionService {
             actionRepository.save(newAction);
         } else {
             Action action = actionFromDb.get();
-            action.setTimestamp(timestamp);
-            actionRepository.save(action);
+            UserActionType userActionType = getFromAvroActionType(userActionAvro.getActionType());
+            if (getActionWeight(action.getActionType()) > getActionWeight(userActionType)) {
+                action.setTimestamp(userActionAvro.getTimestamp());
+                action.setActionType(userActionType);
+                actionRepository.save(action);
+            }
         }
     }
 
@@ -49,6 +55,16 @@ public class ActionServiceImpl implements ActionService {
             case REGISTER -> UserActionType.REGISTER;
             case VIEW -> UserActionType.VIEW;
             default -> throw new IllegalArgumentException("Неизвестный тип действия: " + actionTypeAvro.name());
+        };
+    }
+
+    private double getActionWeight(UserActionType actionType) {
+        return switch (actionType) {
+            case VIEW -> weightStorage.getView();
+            case REGISTER -> weightStorage.getRegister();
+            case LIKE -> weightStorage.getLike();
+            default ->
+                    throw new IllegalArgumentException("Неизвестный тип пользовательского действия: " + actionType.name());
         };
     }
 }
